@@ -86,7 +86,7 @@ source venv/bin/activate
 pip install flask face_recognition opencv-python mediapipe numpy
 ```
 
-3. Create a folder named `faces` in the same directory as `server.py`.
+3. Create a folder named `faces` in the same directory as `serv.py`.
 4. Add face images of authorized users in the `faces` folder. Use the filename format:
 
 ```
@@ -99,7 +99,7 @@ Example:
 5. Run the server:
 
 ```bash
-python server.py
+python serv.py
 ```
 
 ---
@@ -108,12 +108,12 @@ python server.py
 
 ```
 📁 Fingers-Recognizer/
-├── faces/                          # Folder with authorized face images
+├── faces/                            # Folder with authorized face images
 │   ├── john_smith.jpg
 │   └── mary_doe.png
-├── Client/                          # ESP32-CAM code
+├── Client/                           # ESP32-CAM code
 │   └── Client.ino
-├── server.py                        # Flask server
+├── serv.py                           # Flask server
 ├── README.md                         # This file
 ```
 
