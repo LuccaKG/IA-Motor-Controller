@@ -7,10 +7,10 @@
 const char* ssid = "<YOUR_WIFI_NAME>";
 const char* password = "<YOUR_WIFI_PASSWORD>";
 
-// ==== IP do servidor Flask ====
+// ==== Flask server IP ====
 const char* serverURL = "http://<SERVER_IP>:5000/upload";
 
-// ==== Configuração da câmera AI Thinker ====
+// ==== AI Thinker Camera Configuration ====
 #define PWDN_GPIO_NUM     32
 #define RESET_GPIO_NUM    -1
 #define XCLK_GPIO_NUM      0
@@ -38,11 +38,11 @@ const int freq = 30000;
 const int pwmChannel = 0;
 const int pwmResolution  = 8;
 
-// Controle de parada
-int contadorZeros = 0;
-int velocidadeAtual = 0;
+// Stop control
+int zeroCounter = 0;
+int currentSpeed = 0;
 
-// Variável para velocidade
+// Speed variable
 int dutyCycle = 0;
 
 void setup() {
@@ -50,22 +50,22 @@ void setup() {
 
   // Wi-Fi
   WiFi.begin(ssid, password);
-  Serial.print("Conectando ao Wi-Fi");
+  Serial.print("Connecting to Wi-Fi");
   while (WiFi.status() != WL_CONNECTED) {
     delay(500);
     Serial.print(".");
   }
-  Serial.println("\nWi-Fi conectado!");
-  Serial.print("IP local: ");
+  Serial.println("\nWi-Fi connected!");
+  Serial.print("Local IP: ");
   Serial.println(WiFi.localIP());
 
-  // Configura motor
+  // Motor setup
   pinMode(motor1Pin1, OUTPUT);
   pinMode(motor1Pin2, OUTPUT);
   pinMode(enable1Pin, OUTPUT);
   ledcAttachChannel(enable1Pin, freq, pwmResolution, pwmChannel);
 
-  // Configura câmera
+  // Camera setup
   camera_config_t config;
   config.ledc_channel = LEDC_CHANNEL_0;
   config.ledc_timer = LEDC_TIMER_0;
@@ -92,17 +92,17 @@ void setup() {
   config.fb_count = 1;
 
   if (esp_camera_init(&config) != ESP_OK) {
-    Serial.println("Erro ao inicializar a câmera");
+    Serial.println("Failed to initialize camera");
     while(true) delay(1000);
   }
 
-  pararMotor();
+  stopMotor();
 }
 
 void loop() {
   camera_fb_t *fb = esp_camera_fb_get();
   if (!fb) {
-    Serial.println("Falha ao capturar imagem");
+    Serial.println("Failed to capture image");
     delay(2000);
     return;
   }
@@ -115,69 +115,69 @@ void loop() {
     int httpResponseCode = http.POST(fb->buf, fb->len);
     if (httpResponseCode > 0) {
       String response = http.getString();
-      Serial.print("Servidor respondeu: ");
+      Serial.print("Server response: ");
       Serial.println(response);
 
-      int dedos = response.toInt();
-      if (dedos > 0) {
-        contadorZeros = 0;  // Zera contador de zeros
-        velocidadeAtual = mapearDedosParaVelocidade(dedos);
+      int fingers = response.toInt();
+      if (fingers > 0) {
+        zeroCounter = 0;  // Reset zero counter
+        currentSpeed = mapFingersToSpeed(fingers);
 
-        Serial.print("Dedos detectados: ");
-        Serial.println(dedos);
-        Serial.print("Velocidade PWM: ");
-        Serial.println(velocidadeAtual);
+        Serial.print("Fingers detected: ");
+        Serial.println(fingers);
+        Serial.print("PWM speed: ");
+        Serial.println(currentSpeed);
 
-        moverFrente(velocidadeAtual);
+        moveForward(currentSpeed);
       } 
       else {
-        contadorZeros++;
-        Serial.print("Zero detectado. Contador: ");
-        Serial.println(contadorZeros);
+        zeroCounter++;
+        Serial.print("Zero detected. Counter: ");
+        Serial.println(zeroCounter);
 
-        if (contadorZeros >= 10) {
-          pararMotor();
-          velocidadeAtual = 0;
-          Serial.println("Parando motor após 10 zeros consecutivos.");
+        if (zeroCounter >= 10) {
+          stopMotor();
+          currentSpeed = 0;
+          Serial.println("Stopping motor after 10 consecutive zeros.");
         } 
         else {
-          moverFrente(velocidadeAtual);
-          Serial.println("Mantendo última velocidade.");
+          moveForward(currentSpeed);
+          Serial.println("Keeping last speed.");
         }
       }
     } else {
-      Serial.print("Erro HTTP: ");
+      Serial.print("HTTP error: ");
       Serial.println(httpResponseCode);
-      pararMotor();
+      stopMotor();
     }
     http.end();
   } else {
-    Serial.println("Wi-Fi desconectado");
-    pararMotor();
+    Serial.println("Wi-Fi disconnected");
+    stopMotor();
   }
 
   esp_camera_fb_return(fb);
   delay(2000);
 }
 
-void moverFrente(int velocidade) {
+void moveForward(int speed) {
   digitalWrite(motor1Pin1, HIGH);
   digitalWrite(motor1Pin2, LOW);
-  ledcWrite(enable1Pin, velocidade);
+  ledcWrite(enable1Pin, speed);
 }
 
-void pararMotor() {
+void stopMotor() {
   digitalWrite(motor1Pin1, LOW);
   digitalWrite(motor1Pin2, LOW);
   ledcWrite(enable1Pin, 0);
 }
 
-int mapearDedosParaVelocidade(int dedos) {
-  if (dedos < 1) dedos = 1;
-  if (dedos > 5) dedos = 5;
+int mapFingersToSpeed(int fingers) {
+  if (fingers < 1) fingers = 1;
+  if (fingers > 5) fingers = 5;
 
   int dutyMin = 80;
   int dutyMax = 255;
 
-  return map(dedos, 1, 5, dutyMin, dutyMax);
+  return map(fingers, 1, 5, dutyMin, dutyMax);
 }
