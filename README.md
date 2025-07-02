@@ -11,9 +11,11 @@ This project integrates an **ESP32-CAM** with a **Flask server** to perform:
 
 ## Students
 
-Lucca Gonçalves                        - RA: 240233
+**Lucca Gonçalves                        - RA: 240233**
 
-Bruna Gabriele Rodrigues Alves Firmino - RA: 232310
+**Bruna Gabriele Rodrigues Alves Firmino - RA: 232310**
+
+---
 
 ## 📜 Description
 
