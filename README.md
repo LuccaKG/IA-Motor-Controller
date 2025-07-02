@@ -146,6 +146,19 @@ python serv.py
 
 ---
 
+## ⚡Schematic
+
+![ESP32_1_DC_Motor_bb](https://github.com/user-attachments/assets/b9ff92eb-317b-4b2f-8250-81defeb029f0)
+
+---
+
+## 🎥 Demonstration
+
+https://github.com/user-attachments/assets/f94a751c-20c3-4c6b-87f6-7b4729b535e2
+
+**Note:** It was not possible to record a video of the motor in operation due to limitations in the recording setup. Additionally, the finger recognition is not performing at its full potential due to limitations of the camera and the frame rate at which the ESP32 transmits images to the server.
+
+---
 ## 🚧 Important Notes
 
 - ✅ Works on both Wi-Fi networks and mobile hotspots (as long as ESP32 and server are on the same network).
